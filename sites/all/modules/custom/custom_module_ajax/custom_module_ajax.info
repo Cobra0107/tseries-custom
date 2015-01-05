@@ -1,0 +1,6 @@
+name = Custom AJAX Example
+description = A Custom Ajax Examples as Practice
+package = Custom Examples
+core = 7.x
+
+

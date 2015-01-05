@@ -1,0 +1,54 @@
+<?php
+   /*
+      @file: Define Schema to for the new customized profile
+      Imlements hook_schema().
+    */
+
+  function custom_module_ajax_schema(){
+    $schema['cma_profile'] = array(
+      'description' => 'Maintain the profile of the user',
+      'fields'=> array(
+          'cmapid'=>array(
+              'description'=>'unique Identifirer',
+              'type'=>'serial',
+              'unsigned'=>TRUE,
+              'not null'=>TRUE,
+            ),
+          'first_name'=>array(
+              'description'=>'first name of the user',
+              'type'=>'varchar',
+              'length'=> 20,
+              'not null'=>TRUE,
+              'default' => '',
+            ),
+          'last_name'=> array(
+              'description'=>'first name of the user',
+              'type'=>'varchar',
+              'length'=> 20,
+              'default' => '',
+            ),
+          'email'=>array(
+              'description'=>'email address of the user',
+              'type'=>'varchar',
+              'length'=>60,
+              'not null'=>TRUE,
+              'default' => '',
+            ),
+            'state'=>array(
+              'description'=>'Sate of the user',
+              'type'=>'varchar',
+              'length'=>14,
+              'not null'=>TRUE,
+              'default' => '',
+              ),
+            'city'=>array(
+              'description'=>'city of the user',
+              'type'=>'varchar',
+              'length'=>15,
+              'default' => '',
+              ),
+        ),
+      'primary key' => array('cmapid'),
+      );
+    return $schema;
+  }

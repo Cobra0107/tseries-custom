@@ -1,0 +1,225 @@
+<?php
+  /*
+    Implements hook_menu()
+   */
+
+function custom_module_ajax_menu() {
+ $items = array();
+ $items['admin/profile'] = array(
+     'title' => t('Customize My Profile'),
+     'description' => t('Change URl for CSS, JS And Images Path'),
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('custom_ajax_profile_form'),
+     'access arguments' => array('administer site configuration'),
+ );
+
+ /*$items['admin/profile/progressbar/progress/%'] = array(
+    'title' => 'Progress bar progress',
+    'page callback' => 'cma_progressbar_form',
+    'page arguments' => array(4),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+    'file' => 'custom_example_ajax.inc',
+  );*/
+
+/*$items['admin/profile/validate'] = array(
+    'title' => 'Progress bar progress',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('custom_ajax_profile_form_alter'),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+    'file' => 'custom_module_ajax_validate.inc',
+  );
+*/
+ return $items;
+}
+
+/*
+    Implements hook_form()
+ */
+  function custom_ajax_profile_form($form, &$form_state){
+     //$form['#attributes']['form_id'] = 'cma-profile-form-';
+     //$form['#attributes']['class'][] = 'cma-profile-form';
+    //$form = array();
+    //$form ['time'] = REQUEST_TIME;
+    $form_state['time'] = REQUEST_TIME;
+
+    $form['firstname'] = array(
+        '#title' => t('First Name'),
+        '#type' => 'textfield',
+        '#required' => TRUE,
+        //'#element_validate' => array('element_validate_firstname'),
+      );
+
+    $form['add_last_name'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Add last name'),
+      '#ajax' => array(
+        'callback' => 'lastname_text_callback',
+        'wrapper' => 'lastname',
+        'effect' => 'slide',
+        ),
+      );
+
+    if(!empty($form_state['values']['add_last_name'])){
+    $form['lastname'] = array(
+      '#title' => t('Last Name'),
+      '#type' => 'fieldset',
+      );
+
+
+          $form['lastname']['last_name']=array(
+              '#title'=>t('Last Name'),
+              '#type'=>'textfield',
+            );
+    }
+
+    $form['wrapper'] = array(
+      '#prefix' => '<div id="lastname">',
+      '#suffix' => '</div>',
+      );
+
+    $form['Email'] = array(
+        '#title' => t('Email'),
+        '#type' => 'textfield',
+        '#required' => TRUE,
+
+      );
+
+    //For selecting first dropdown list
+    $state_options=get_state_options();
+
+    //For the default value in dropdown
+    $first = isset($form_state['values']['state']) ? $form_state['values']['state'] : key($state_options);
+
+    $form['state'] = array(
+      '#title' => t('State'),
+      '#type'=>'select',
+      '#options'=> $state_options,
+      '#default_value' => $first,
+      '#ajax' => array(
+          'callback'=>'get_city_dropdown_callback',
+          'wrapper'=>'get_city_dropdown',
+        ),
+      );
+
+    $form['city']=array(
+        '#title'=> t('City'),
+        '#type'=>'select',
+        '#options'=>get_city_options($first),
+        '#prefix' => '<div id="get_city_dropdown">',
+        '#suffix' => '</div>',
+        '#default_value'=>isset($form_state['values']['city']) ? $form_state['values']['city'] : '',
+
+      );
+
+
+    $form['status'] = array(
+    '#markup' => '<div id="progress-status"></div>',
+  );
+    $form['submit'] = array(
+       '#type' => 'submit',
+       '#value' => 'Create Profile',
+       //'#callback' => 'cma_profile_create',
+        );
+
+       $form['profile_wrapper'] = array(
+      '#prefix' => '<div id="profile-wrapper">',
+      '#suffix' => '</div>',
+    );
+
+       l(t('List profiles'), 'list-Profiles', array('attributes' => array('class' => array('list-profile'))));
+
+      return $form;
+  }
+
+ function lastname_text_callback($form, $form_state){
+      return $form['lastname'];
+ }
+
+ function get_city_dropdown_callback($form,$form_state){
+    return drupal_render($form['city']);
+ }
+
+
+function get_state_options(){
+
+    return drupal_map_assoc(array(
+      t('Maharashtra'),
+      t('Goa'),
+      t('karnataka'),
+      t('Delhi'),
+      ));
+}
+
+function get_city_options($key = ''){
+  $options= array(
+      t('Maharashtra')=> drupal_map_assoc(array(
+        t('Mumbai'),
+        t('Pune'),
+        t('Ratnagiri'),
+        )),
+
+      t('Goa') => drupal_map_assoc(array(
+        t('Wasko'),
+        t('Benaulim'),
+        t('Panjim'),
+        )),
+
+      t('karnataka')=>drupal_map_assoc(array(
+          t('Belgaon'),
+          t('Banguluru'),
+          t('Gulbarga'),
+        )),
+      t('Delhi')=>drupal_map_assoc(array(
+        t('Laxminagar'),
+        t('Indraprastha'),
+        t('Cannaught place'),
+        )),
+    );
+   if(isset($options[$key])) {
+    return $options[$key];
+   }
+   else
+    return array();
+}
+
+function cma_profile_validate($form, &$form_state) {
+  return 'done';
+}
+
+function custom_ajax_profile_form_submit($form, &$form_state) {
+  $result=db_insert('cma_profile')
+      ->fields(array(
+      'first_name'=>$form_state['values']['firstname'],
+      'last_name'=>$form_state['values']['last_name'],
+      'email'=>$form_state['values']['Email'],
+      'state'=>$form_state['values']['state'],
+      'city'=>$form_state['values']['city']))
+      ->execute();
+}
+function custom_ajax_profile_form_validate($form, &$form_state) {
+/*print '<pre>';
+print_r($form_state['values']);
+exit;*/
+  $mail = $form_state['values']['Email'];
+ if (empty($form_state['values']['Email'])) {
+    form_set_error('Email', 'Please enter Email.');
+    $form_state['rebuild'] = TRUE;
+  }
+  if (empty($form_state['values']['firstname'])) {
+    form_set_error('firstname', 'Please enter firstname.');
+    $form_state['rebuild'] = TRUE;
+  }
+  if (empty($form_state['values']['last_name'])) {
+    form_set_error('last_name', 'Please enter last_name.');
+    $form_state['rebuild'] = TRUE;
+
+  if (valid_email_address($mail)) {
+    form_set_error('Email', t('Please enter valid Email.'));
+    $form_state['rebuild'] = TRUE;
+  }
+  }
+
+  //dsm($form_state);
+}
