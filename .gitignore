@@ -1,6 +1,16 @@
+# Ignore emacs backup files...
+*~
+
 # Ignore configuration files that may contain sensitive information.
-sites/*/settings*.php
+sites/*/settings.php
 
 # Ignore paths that contain user-generated content.
+.sass-cache/*
 sites/*/files
 sites/*/private
+.htaccess
+.tags*
+.DS_Store
+._.DS_Store
+.svn/
+.bundle/
