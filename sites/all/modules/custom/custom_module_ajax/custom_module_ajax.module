@@ -7,10 +7,12 @@ function custom_module_ajax_menu() {
  $items = array();
  $items['admin/profile'] = array(
      'title' => t('Customize My Profile'),
-     'description' => t('Change URl for CSS, JS And Images Path'),
+     //'description' => t('Change URl for CSS, JS And Images Path'),
      'page callback' => 'drupal_get_form',
      'page arguments' => array('custom_ajax_profile_form'),
-     'access arguments' => array('administer site configuration'),
+     'type' => MENU_DEFAULT_LOCAL_TASK,
+     'weight'=>-10,
+     'access arguments' => array('access content'),
  );
 
  /*$items['admin/profile/progressbar/progress/%'] = array(
@@ -22,15 +24,16 @@ function custom_module_ajax_menu() {
     'file' => 'custom_example_ajax.inc',
   );*/
 
-/*$items['admin/profile/validate'] = array(
-    'title' => 'Progress bar progress',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('custom_ajax_profile_form_alter'),
-    'type' => MENU_CALLBACK,
+$items['admin/profile/list'] = array(
+    'title' => 'List',
+    'page callback' => 'profile_list',
+    //'page arguments' => array('custom_ajax_profile_form_alter'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -9,
     'access arguments' => array('access content'),
-    'file' => 'custom_module_ajax_validate.inc',
+    //'file' => 'custom_module_ajax_validate.inc',
   );
-*/
+
  return $items;
 }
 
@@ -221,5 +224,37 @@ exit;*/
   }
   }
 
-  //dsm($form_state);
+}
+
+function profile_list() {
+  $output = '';
+
+  // Get all entries in the cma_profile table.
+  if ($entries = fetch_profiles()) {
+    $rows = array();
+    foreach ($entries as $entry) {
+      // Sanitize the data before handing it off to the theme.
+      $rows[] = array_map('check_plain', (array) $entry);
+    }
+    // Make a table for them.
+    $header = array(t('Id'), t('First Name'),t('Surname'), t('Email'),t('State'),t('City'));
+    $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  }
+  else {
+    drupal_set_message(t('No entries have been added yet.'));
+  }
+  return $output;
+}
+
+function fetch_profiles($entry = array()) {
+  // Read all fields from the cma_profile table.
+  $select = db_select('cma_profile', 'profile');
+  $select->fields('profile');
+
+  // Add each field and value as a condition to this query.
+  foreach ($entry as $field => $value) {
+    $select->condition($field, $value);
+  }
+  // Return the result in object format.
+  return $select->execute()->fetchAll();
 }
