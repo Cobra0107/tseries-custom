@@ -10,6 +10,16 @@ function custom_module_ajax_menu() {
      //'description' => t('Change URl for CSS, JS And Images Path'),
      'page callback' => 'drupal_get_form',
      'page arguments' => array('custom_ajax_profile_form'),
+     //'type' => MENU_DEFAULT_LOCAL_TASK,
+     'weight'=>-10,
+     'access arguments' => array('access content'),
+ );
+
+$items['admin/profile/add'] = array(
+     'title' => t('Customize My Profile'),
+     //'description' => t('Change URl for CSS, JS And Images Path'),
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('custom_ajax_profile_form'),
      'type' => MENU_DEFAULT_LOCAL_TASK,
      'weight'=>-10,
      'access arguments' => array('access content'),
