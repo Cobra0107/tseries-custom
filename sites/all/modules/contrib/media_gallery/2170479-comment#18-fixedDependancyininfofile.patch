@@ -1,0 +1,13 @@
+diff --git a/sites/all/modules/contrib/examples/ajax_example/ajax_example.module b/sites/all/modules/contrib/examples/ajax_example/ajax_example.module
+index 0a6b799..4f42be3 100644
+--- a/sites/all/modules/contrib/examples/ajax_example/ajax_example.module
++++ b/sites/all/modules/contrib/examples/ajax_example/ajax_example.module
+@@ -540,7 +540,7 @@ function ajax_example_submit_driven_callback($form, $form_state) {
+   // rather than the callback. Submit driven forms are an exception, because
+   // you may not want to return the form at all.
+   $element = $form['box'];
+-  $element['#markup'] = "Clicked submit ({$form_state['values']['op']}): " . date('c');
++  $element['#markup'] = "helo";
+   return $element;
+ }
+ 
